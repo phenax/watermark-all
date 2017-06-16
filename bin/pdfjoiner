@@ -1,0 +1,13 @@
+#!/bin/bash
+# Join all pages in a pdf into one
+
+PDF_FILE="$PWD/$1"
+PDF_FILE_SIZE=$(identify -format %w $PDF_FILE)
+
+convert \
+	-density 300   \
+	$PDF_FILE \
+	-quality 100 \
+	-sharpen 0x1.0 \
+	-background white \
+	-append $PWD/$2;

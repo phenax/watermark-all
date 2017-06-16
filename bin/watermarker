@@ -1,0 +1,34 @@
+#!/bin/bash
+
+WATERMARK=$1
+WATERMARK_WIDTH=$(identify -format %w $WATERMARK)
+shift
+
+while (( "$#" )); do
+    FILE=$1
+    echo "Watermarking $FILE...";
+    FILE_PATH_WITHOUT_DOT=${FILE#"."}
+
+    FILE_PATH_WITHOUT_DOT="zresult$FILE_PATH_WITHOUT_DOT"
+    DIRNME=$(dirname $FILE_PATH_WITHOUT_DOT)
+
+    mkdir -p $DIRNME
+
+    composite \
+        -quality 100 \
+        -gravity Center \
+        -density 400 \
+        -dissolve 80% \
+        -sharpen 0x1.0 \
+        $WATERMARK \
+        -resize $WATERMARK_WIDTH \
+        $FILE $FILE_PATH_WITHOUT_DOT;
+
+    # convert \
+    #     $FILE null: $WATERMARK \
+    #     -gravity Center \
+    #     -compose multiply \
+    #     -layers composite \
+    #     $FILE_PATH_WITHOUT_DOT;
+    shift
+done
