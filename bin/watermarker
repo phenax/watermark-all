@@ -1,57 +1,78 @@
 #!/bin/bash
 
-WATERMARK="$1"
-WATERMARK_SIZE="$(identify -format %w $WATERMARK)"
-WATERMARK_SIZE=$((80 * $WATERMARK_SIZE / 100));
-shift
+# Argument length error
+if [ "$#" -lt 2 ]; then
+    echo "Dude. Thats not how you're supposed to use this shit.";
+    exit 1;
+fi
 
+WATERMARK="$1"; shift;
+
+# Get watermark width
+# WATERMARK_SIZE="$(identify -format %w $WATERMARK)"
+# WATERMARK_SIZE=$((80 * $WATERMARK_SIZE / 100));
+
+# The pdf size
+PDF_WIDTH="800"
+WATERMARK_SIZE=$((50 * $PDF_WIDTH / 100));
+
+# If the watermark doesnt exist exit out
+if [ -f $WATERMARK ]; then
+    echo "## Yo bro! WatermarkAll here ##";
+else
+    echo "The watermark does not exist";
+    exit 1;
+fi
+
+# Change opacity of the watermark
+echo "Changing watermark opacity...";
+
+LOW_ALPHA_WATERMARK="$WATERMARK.low-alpha.png"
+
+convert \
+    $WATERMARK \
+    -alpha on \
+    -channel a \
+    -evaluate set 50% \
+    -resize $WATERMARK_SIZE \
+    $LOW_ALPHA_WATERMARK &&
 
 # Iterate over all parameters except first one
 while (( "$#" )); do
 
     FILE="$1"
+    OUTPUT_FILE=${FILE#"."}             # Remove the first dot from filename
+    OUTPUT_FILE="zresult$OUTPUT_FILE"   # Prepend the result directory name
+    OUTPUT_DIR=$(dirname $OUTPUT_FILE)  # Get the dirname of the pdf file directory
 
-    OUTPUT_FILE=${FILE#"."}
-    OUTPUT_FILE="zresult$OUTPUT_FILE"
-    OUTPUT_DIR=$(dirname $OUTPUT_FILE)
-
-    PDF_WIDTH="1200"
+    # PDF file exists check
+    if [ ! -f $FILE ]; then
+        echo "File not found: $FILE";
+    fi
 
     # Create the directory of the result watermarked image
     mkdir -p $OUTPUT_DIR
 
-    echo "Watermarking $FILE...";
-
     # Watermark the pdf and create a new one
-    # convert \
-    #     -density 400 \
-    #     $FILE null: $WATERMARK \
-    #     -gravity Center \
-    #     -sharpen 0x1.0 \
-    #     -quality 100 \
-    #     -compose multiply \
-    #     -resize $PDF_WIDTH \
-    #     -layers composite \
-    #     $OUTPUT_FILE &&
-
-    composite \
-        -quality 100 \
+    echo "Watermarking $FILE...";
+    convert \
+        -density 100 \
+        $FILE null: $LOW_ALPHA_WATERMARK \
         -gravity Center \
-        -density 400 \
-        -dissolve 80% \
         -sharpen 0x1.0 \
+        -quality 200 \
         -compose multiply \
-        $WATERMARK \
         -resize $PDF_WIDTH \
-        $FILE $OUTPUT_FILE &&
-
-
-    echo "Joining to png $FILE.png..." &&
+        -layers composite \
+        $OUTPUT_FILE &&
 
     # Join all pages in the pdf into a png
+    echo "Joining to png $FILE.png..." &&
     pdfjoiner \
         $OUTPUT_FILE \
         $OUTPUT_FILE.png;
 
     shift
 done
+
+rm $LOW_ALPHA_WATERMARK;

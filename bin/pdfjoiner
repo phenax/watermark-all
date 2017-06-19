@@ -5,11 +5,19 @@ PDF_FILE="$1"
 OUTPUT_IMAGE="$2"
 PDF_FILE_SIZE=$(identify -format %w $PDF_FILE)
 
+if [ -f $PDF_FILE ]; then
+    echo "## Yo bro! PDFJoiner here ##";
+else
+    echo "The watermark does not exist";
+    exit;
+fi
+
+# Create a png out of the pdf
 convert \
 	-fill white \
 	-density 300 \
+	-background white \
 	$PDF_FILE \
 	-quality 100 \
 	-sharpen 0x1.0 \
-	-background white \
 	-append $OUTPUT_IMAGE;
