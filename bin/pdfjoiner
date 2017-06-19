@@ -1,13 +1,15 @@
 #!/bin/bash
-# Join all pages in a pdf into one
+# Join all pages in a pdf into one image
 
-PDF_FILE="$PWD/$1"
+PDF_FILE="$1"
+OUTPUT_IMAGE="$2"
 PDF_FILE_SIZE=$(identify -format %w $PDF_FILE)
 
 convert \
-	-density 300   \
+	-fill white \
+	-density 300 \
 	$PDF_FILE \
 	-quality 100 \
 	-sharpen 0x1.0 \
 	-background white \
-	-append $PWD/$2;
+	-append $OUTPUT_IMAGE;
