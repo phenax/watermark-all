@@ -5,10 +5,8 @@ PDF_FILE="$1"
 OUTPUT_IMAGE="$2"
 PDF_FILE_SIZE=$(identify -format %w $PDF_FILE)
 
-if [ -f $PDF_FILE ]; then
-    echo "## Yo bro! PDFJoiner here ##";
-else
-    echo "The watermark does not exist";
+if [ ! -f $PDF_FILE ]; then
+    echo "File not found: $PDF_FILE";
     exit;
 fi
 

@@ -17,9 +17,7 @@ PDF_WIDTH="800"
 WATERMARK_SIZE=$((50 * $PDF_WIDTH / 100));
 
 # If the watermark doesnt exist exit out
-if [ -f $WATERMARK ]; then
-    echo "## Yo bro! WatermarkAll here ##";
-else
+if [ ! -f $WATERMARK ]; then
     echo "The watermark does not exist";
     exit 1;
 fi
